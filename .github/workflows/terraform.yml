@@ -30,8 +30,9 @@ jobs:
 
       - name: Generate Backend Config and Initialize Terraform
         run: |
+          cd terraform
           chmod +x ./generate_backend_config.sh
           ./generate_backend_config.sh
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve
+        run: cd terraform; terraform apply -auto-approve

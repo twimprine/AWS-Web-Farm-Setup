@@ -40,6 +40,8 @@ sudo apt install jq     # Adjust for your package manager
 pip install --upgrade awscli
 ./generate_backend_config.sh
 ```
-This will create a backend.conf file for terraform to read and use while initializing. It will ask if you want to execute ```terraform init``` through the script. If you want to run it manually you can use the command ```terraform init -backend-config=backend.conf```
+This will create a backend.conf file for terraform to read and use while initializing. It uses the ```awscli``` to create the S3 Bucket and DynamoDB for the state information. 
+
+If you don't want to use remote state (I would highly recommend it if you use multiple machines) just remove or rename the ```backend.tf``` file. 
 
 ## Ansible
