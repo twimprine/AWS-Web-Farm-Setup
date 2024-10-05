@@ -8,6 +8,8 @@ on:
 jobs:
   terraform:
     runs-on: ubuntu-latest
+    env:
+      AWS_REGION: us-east-1
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
