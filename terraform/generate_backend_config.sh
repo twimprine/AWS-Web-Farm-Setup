@@ -7,8 +7,8 @@ if ! command -v jq &>/dev/null; then
 fi
 
 # Read variables from terraform.tfvars.json
-PROJECT_NAME=$(jq -r '.project_name' terraform/terraform.tfvars.json)
-AWS_REGION=$(jq -r '.aws_region' terraform/terraform.tfvars.json)
+PROJECT_NAME=$(jq -r '.project_name' ./terraform.tfvars.json)
+AWS_REGION=$(jq -r '.aws_region' ./terraform.tfvars.json)
 
 # Validate that variables are not empty
 if [ -z "$PROJECT_NAME" ] || [ -z ${AWS_REGION} ]; then
