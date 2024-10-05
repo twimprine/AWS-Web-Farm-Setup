@@ -1,0 +1,35 @@
+name: Terraform Deployment
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y jq
+          pip install --upgrade awscli
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Generate Backend Config and Initialize Terraform
+        run: |
+          chmod +x ./generate_backend_config.sh
+          ./generate_backend_config.sh
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
