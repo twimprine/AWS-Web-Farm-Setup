@@ -7,6 +7,8 @@ if ! command -v jq &>/dev/null; then
 fi
 
 # Read variables from terraform.tfvars.json
+pwd
+ls -alh
 PROJECT_NAME=$(jq -r '.project_name' ./terraform.tfvars.json)
 AWS_REGION=$(jq -r '.aws_region' ./terraform.tfvars.json)
 
