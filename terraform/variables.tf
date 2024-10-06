@@ -2,7 +2,17 @@
 # Deployment variables
 ####################
 
-variable "GitHub_Deploy"{
+# variable "availability_zones" {
+#   description = "AWS Availability Zones"
+#   type        = list(string)
+# }
+
+variable "autoscaling"{
+  description = "Autoscaling attributes"
+  type        = map(string)
+}
+
+variable "github_deploy"{
   description = "Deploy from GitHub or from local system"
   type        = bool
 }
@@ -27,11 +37,20 @@ variable "root_domain" {
   type        = string
 }
 
-variable "default_tags" {
+# variable "combined_tags" {
+#   description = "Tags to apply to all resources"
+#   type        = map(string)
+# }
+
+# variable "default_tags" {
+#   description = "Tags to apply to all resources"
+#   type        = map(string)
+# }
+
+variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)
 }
-
 variable "aws_region" {
   description = "AWS region to deploy resources"
 }
@@ -45,11 +64,7 @@ variable "host_instance_type" {
   type        = string
 }
 
-###############################
-# Code Variables
-###############################
-variable "branch" {
-  description = "Current Git branch name"
-  type        = string
-  default     = ""
-}
+# variable "branch" {
+#   description = "Current Git branch name"
+#   type        = string
+# }

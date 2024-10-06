@@ -4,7 +4,7 @@ resource "aws_vpc" "vpc" {
   enable_network_address_usage_metrics = true
 
   tags = merge(var.tags, {
-    Name = lower(format("VPC-%s-%s", var.tags["project_name"], var.tags["branch"]))
+    Name = lower(format("VPC-%s", var.tags["project_name"]))
   })
 
   lifecycle {

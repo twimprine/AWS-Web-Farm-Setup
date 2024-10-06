@@ -54,6 +54,7 @@ echo "backend.conf generated successfully."
 if aws s3api head-bucket --bucket ${PROJECT_NAME_FINAL} 2>/dev/null; then
   echo "S3 bucket $PROJECT_NAME_FINAL already exists."
 else
+  PAUSE = true
   echo "Creating S3 bucket $PROJECT_NAME_FINAL..."
   aws s3api create-bucket --bucket "${PROJECT_NAME_FINAL}" --region ${AWS_REGION} 
   aws s3api put-bucket-versioning --bucket ${PROJECT_NAME_FINAL} --versioning-configuration Status=Enabled
@@ -65,6 +66,7 @@ fi
 if aws dynamodb describe-table --table-name "terraform-lock-table-${PROJECT_NAME_FINAL}" 2>/dev/null; then
   echo "DynamoDB table terraform-lock-table-${PROJECT_NAME_FINAL} already exists."
 else
+  PAUSE = true
   echo "Creating DynamoDB table terraform-lock-table-${PROJECT_NAME_FINAL}..."
   aws dynamodb create-table \
     --table-name "terraform-lock-table-${PROJECT_NAME_FINAL}" \
@@ -75,8 +77,11 @@ else
   echo "DynamoDB table terraform-lock-table-${PROJECT_NAME_FINAL} created."
 fi
 
+if [ "$PAUSE" = true ]; then
 # Initialize Terraform
-echo "Initializing Terraform..."
-echo "Pausing 60 seconds to allow Bucket and DynamoDB table to be created..."
-sleep 60
-terraform init -backend-config=backend.conf
+  echo "Initializing Terraform..."
+  echo "Pausing 60 seconds to allow Bucket and DynamoDB table to be created..."
+  sleep 60
+  terraform init -backend-config=backend.conf
+fi
+
