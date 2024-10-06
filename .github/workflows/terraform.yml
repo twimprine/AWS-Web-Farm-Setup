@@ -35,7 +35,7 @@ jobs:
           ./generate_backend_config.sh
 
       - name: Terraform Init
-        run: cd terraform; terraform init
-        
+        run: cd terraform; cat backend.conf; terraform init
+
       - name: Terraform Apply
         run: cd terraform; terraform apply -auto-approve
