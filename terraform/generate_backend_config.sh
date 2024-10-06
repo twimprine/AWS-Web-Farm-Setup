@@ -49,6 +49,7 @@ encrypt        = true
 EOF
 
 echo "backend.conf generated successfully."
+cat backend.conf
 
 # Check if the S3 bucket exists
 if aws s3api head-bucket --bucket ${PROJECT_NAME_FINAL} 2>/dev/null; then
