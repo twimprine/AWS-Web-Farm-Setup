@@ -113,7 +113,6 @@ resource "aws_security_group" "hosts_secgrp" {
 #} 
 
 resource "aws_autoscaling_group" "hosts_asg" {
-  /* name                      = "hosts-asg" */
   max_size                  = var.asg_max_size
   min_size                  = var.asg_min_size
   desired_capacity          = var.asg_desired_capacity
@@ -121,23 +120,49 @@ resource "aws_autoscaling_group" "hosts_asg" {
   health_check_grace_period = 300
   force_delete              = true
   termination_policies      = ["OldestInstance"]
-
   name_prefix         = lower(format("host-%s", var.tags["project_name"]))
   vpc_zone_identifier = aws_subnet.private_subnets[*].id
   # target_group_arns   = [var.load_balancer_target_group.arn]
   target_group_arns = []
 
-  launch_template {
-    id      = aws_launch_template.host_launch_template.id
-    version = "$Latest"
+  mixed_instances_policy {
+    launch_template {
+      launch_template_specification {
+        launch_template_id = aws_launch_template.host_launch_template.id
+        version            = "$Latest"
+      }
+
+      # Optionally specify overrides for multiple instance types
+    #   dynamic "override" {
+    #     for_each = var.instance_types
+    #     content {
+    #       instance_type = override.value
+    #     }
+    #   }
+    }
+
+    instances_distribution {
+      on_demand_base_capacity                  = var.asg_desired_capacity
+      on_demand_percentage_above_base_capacity = 0
+      spot_allocation_strategy                 = "lowest-price"
+      spot_instance_pools                      = 2
+      # spot_max_price                          = "" # Optional: Set a max price for spot instances
+    }
   }
+
+
+  # launch_template {
+  #   id      = aws_launch_template.host_launch_template.id
+  #   version = "$Latest"
+  # }
 
   tag {
     key                 = "Name"
-    value               = lower(format("asg-host-%s", var.tags["project_name"]))
+    value               = lower(format("asg-%s", var.tags["project_name"]))
     propagate_at_launch = true
   }
-dynamic "tag" {
+
+  dynamic "tag" {
     for_each = var.tags
     content {
       key                 = tag.key
@@ -154,7 +179,7 @@ dynamic "tag" {
 }
 
 resource "aws_launch_template" "host_launch_template" {
-  name_prefix   = lower(format("node-%s", var.tags["project_name"]))
+  name_prefix   = lower(format("asg-template-%s-", var.tags["project_name"]))
   image_id      = data.aws_ami.ubuntu.id
   instance_type = var.host_instance_type
   /* vpc_security_group_ids = [aws_security_group.hosts_secgrp.id] */
@@ -173,7 +198,7 @@ resource "aws_launch_template" "host_launch_template" {
   instance_initiated_shutdown_behavior = "terminate"
 
   network_interfaces {
-    associate_public_ip_address = true
+    associate_public_ip_address = false
     delete_on_termination       = true
     security_groups             = [aws_security_group.hosts_secgrp.id]
   }
