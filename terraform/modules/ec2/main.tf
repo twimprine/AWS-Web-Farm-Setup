@@ -35,13 +35,6 @@ resource "aws_subnet" "private_subnets" {
 resource "aws_security_group" "hosts_secgrp" {
   vpc_id = var.vpc_id
 
-  # ingress { # Allow SSH from anywhere
-  #   from_port   = 22
-  #   to_port     = 22
-  #   protocol    = "tcp"
-  #   cidr_blocks = ["0.0.0.0/0"]
-  # }
-
   ingress { # Allow the listening port from the loadbalancer
     from_port   = var.app_listening_port
     to_port     = var.app_listening_port
@@ -87,31 +80,6 @@ resource "aws_security_group" "hosts_secgrp" {
 
 }
 
-
-
-# I am creating a little logic here. If we decide we need more than five hosts we probably don't want them all in the same 
-# datacenter so I'm spreading them out. Less than five isn't worth the additional incurred cost. 
-# resource "aws_instance" "hosts" {
-/* count                       = var.number_worker_nodes */
-#  ami                         = var.ami_id
-#  instance_type               = var.instance_type
-#  associate_public_ip_address = true
-/* key_name                    = var.ssh_key.key_name */
-
-# I need to get the mod of the (available az/subnets) if nodes > 5 otherwise the index makes it try and assign to subnets that don't exist
-/* subnet_id = var.number_worker_nodes > 5 ? var.private_subnets[count.index - (3 * floor(count.index / 3))].id : var.private_subnets[1].id */
-#subnet_id     = var.number_worker_nodes > 5 ? aws_subnet.host_subnets[count.index].id : aws_subnet.host_subnets[1].id
-#  vpc_security_group_ids = [aws_security_group.hosts_secgrp.id]
-
-#  tags = merge(var.tags, {
-#    Name = upper(format("web-node-%s-%s-%s", var.tags["Customer"], var.tags["Project"], var.tags["Environment"]))
-#  })
-
-#  lifecycle {
-#    create_before_destroy = true
-#  }
-#} 
-
 resource "aws_autoscaling_group" "hosts_asg" {
   max_size                  = var.asg_max_size
   min_size                  = var.asg_min_size
@@ -131,14 +99,6 @@ resource "aws_autoscaling_group" "hosts_asg" {
         launch_template_id = aws_launch_template.host_launch_template.id
         version            = "$Latest"
       }
-
-      # Optionally specify overrides for multiple instance types
-    #   dynamic "override" {
-    #     for_each = var.instance_types
-    #     content {
-    #       instance_type = override.value
-    #     }
-    #   }
     }
 
     instances_distribution {
@@ -150,15 +110,9 @@ resource "aws_autoscaling_group" "hosts_asg" {
     }
   }
 
-
-  # launch_template {
-  #   id      = aws_launch_template.host_launch_template.id
-  #   version = "$Latest"
-  # }
-
   tag {
     key                 = "Name"
-    value               = lower(format("asg-%s", var.tags["project_name"]))
+    value               = lower(format("asg-host-%s", var.tags["project_name"]))
     propagate_at_launch = true
   }
 
@@ -171,8 +125,6 @@ resource "aws_autoscaling_group" "hosts_asg" {
     }
   }
 
-
-
   lifecycle {
     create_before_destroy = true
   }
@@ -182,7 +134,6 @@ resource "aws_launch_template" "host_launch_template" {
   name_prefix   = lower(format("asg-template-%s-", var.tags["project_name"]))
   image_id      = data.aws_ami.ubuntu.id
   instance_type = var.host_instance_type
-  /* vpc_security_group_ids = [aws_security_group.hosts_secgrp.id] */
   block_device_mappings {
     device_name = "/dev/sda1"
     ebs {
@@ -202,6 +153,8 @@ resource "aws_launch_template" "host_launch_template" {
     delete_on_termination       = true
     security_groups             = [aws_security_group.hosts_secgrp.id]
   }
+
+  # user_data = This will pull the ansible script to configure the host from S3
 
   lifecycle {
     create_before_destroy = true
