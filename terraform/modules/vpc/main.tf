@@ -12,3 +12,16 @@ resource "aws_vpc" "vpc" {
   }
 
 }
+
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.vpc.id
+
+  tags = merge(var.tags, {
+    Name = lower(format("IGW-%s", var.tags["project_name"]))
+  })
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
