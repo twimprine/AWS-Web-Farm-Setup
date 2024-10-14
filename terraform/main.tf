@@ -54,3 +54,26 @@ module "ec2" {
   asg_min_size = var.autoscaling.min_size
   vpc_id = module.vpc.vpc_id
 }
+
+# Create s3 bucket for Ansible and other config files
+module "s3" {
+  source = "./modules/s3"
+
+  tags = merge(
+    data.aws_default_tags.default_tags.tags, {
+      project_name = format(lower(local.project_name))
+    }
+  )
+ 
+}
+
+module "iam" {
+  source = "./modules/iam"
+   tags = merge(
+    data.aws_default_tags.default_tags.tags, {
+      project_name = format(lower(local.project_name))
+    }
+  )
+
+  config_bucket_name = module.s3.config_bucket_name
+}

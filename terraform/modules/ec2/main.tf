@@ -27,9 +27,11 @@ resource "aws_subnet" "private_subnets" {
       name     = lower(format("net-%s-%03d", var.tags["project_name"], count.index + 1))
       Function = "Private Host Subnets"
   })
+  
   lifecycle {
     create_before_destroy = true
   }
+
 }
 
 resource "aws_security_group" "hosts_secgrp" {
@@ -77,6 +79,8 @@ resource "aws_security_group" "hosts_secgrp" {
   lifecycle {
     create_before_destroy = true
   }
+
+  tags = var.tags
 
 }
 
@@ -141,6 +145,15 @@ resource "aws_launch_template" "host_launch_template" {
       volume_type = "gp2"
     }
   }
+
+ user_data = base64encode(
+  templatefile("${path.root}/files/scripts/ec2_initial_script.sh.tftpl", {
+    bucket_name = lower(format("s3-%s", var.tags["project_name"]))
+  })
+)
+
+
+  
 
   monitoring {
     enabled = true

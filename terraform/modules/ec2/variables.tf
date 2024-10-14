@@ -49,8 +49,6 @@ variable "asg_max_size" {
   description = "Maximum number of worker nodes"
 }
 
-
-
 # variable "load_balancer_object" {
 #   description = "ALB Object"
 # }
