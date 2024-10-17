@@ -9,7 +9,7 @@ resource "aws_s3_bucket" "config_bucket" {
 resource "aws_s3_object" "initial_config_playbook" {
   bucket = aws_s3_bucket.config_bucket.bucket
   key    = "initial_config/initial_playbook.yml"
-  source = "${path.root}/files/scripts/initial_playbook.tftpl"
+  source = "${path.root}/files/scripts/ec2_initial_script.sh.tftpl"
   acl    = "private"
 
   tags = var.tags

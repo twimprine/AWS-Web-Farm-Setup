@@ -24,7 +24,7 @@ resource "aws_subnet" "private_subnets" {
 
   tags = merge(var.tags,
     {
-      name     = lower(format("net-%s-%03d", var.tags["project_name"], count.index + 1))
+      Name     = lower(format("net-%s-%03d", var.tags["project_name"], count.index + 1))
       Function = "Private Host Subnets"
   })
   
