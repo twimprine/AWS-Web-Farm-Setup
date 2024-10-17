@@ -1,0 +1,58 @@
+---
+- name: Request and install ACM Private CA certificate
+  hosts: localhost
+  become: true
+  tasks:
+    - name: Request a certificate from ACM Private CA
+      shell: |
+        aws acm-pca issue-certificate \
+          --certificate-authority-arn {{ ca_arn }} \
+          --csr file://path/to/csr.pem \  # Specify CSR path or generate it here
+          --signing-algorithm "SHA256WITHRSA" \
+          --validity Value=365,Type="DAYS" \
+          --idempotency-token $(uuidgen) \
+          --query 'CertificateArn' \
+          --output text
+      register: cert_arn
+
+    - name: Wait for certificate to be issued
+      pause:
+        seconds: 30  # Adjust as needed to ensure the certificate is issued
+
+    - name: Retrieve the certificate
+      shell: |
+        aws acm-pca get-certificate \
+          --certificate-authority-arn {{ ca_arn }} \
+          --certificate-arn {{ cert_arn.stdout }} \
+          --query '{Certificate:Certificate,CertificateChain:CertificateChain,PrivateKey:PrivateKey}' \
+          --output json
+      register: certificate_output
+
+    - name: Write certificate to file
+      copy:
+        content: "{{ certificate_output.stdout | from_json | json_query('Certificate') }}"
+        dest: /etc/ssl/certs/instance_cert.crt
+
+    - name: Write certificate chain to file
+      copy:
+        content: "{{ certificate_output.stdout | from_json | json_query('CertificateChain') }}"
+        dest: /etc/ssl/certs/ca_chain.crt
+
+    - name: Write private key to file
+      copy:
+        content: "{{ certificate_output.stdout | from_json | json_query('PrivateKey') }}"
+        dest: /etc/ssl/private/instance_cert.key
+        mode: "0600"
+
+    - name: Configure NGINX with certificate
+      template:
+        src: /path/to/nginx_template.j2
+        dest: /etc/nginx/sites-available/default
+        mode: "0644"
+      notify: restart nginx
+
+  handlers:
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted

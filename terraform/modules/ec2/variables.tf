@@ -89,3 +89,8 @@ variable "load_balancer_web_target_group_arn" {
   description = "The ARN of the ALB target group to attach the ASG"
   type        = string
 }
+
+variable "ec2_acm_iam_profile_name" {
+  description = "IAM Instance Profile for EC2 instances to access the ACM Private Certificate Authority"
+  type        = string
+}

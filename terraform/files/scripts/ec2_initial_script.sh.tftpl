@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 sudo apt update -y
-sudo apt install ansible gpg wget ca-certificates
+sudo apt install ansible awscli gpg wget ca-certificates
 
 # Fetch Ansible playbook from S3
 aws s3 cp s3://"$(bucket_name)"/ansible/initial_playbook.yml /tmp/playbook.yml

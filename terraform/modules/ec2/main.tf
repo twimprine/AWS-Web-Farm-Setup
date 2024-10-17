@@ -122,6 +122,12 @@ resource "aws_autoscaling_group" "hosts_asg" {
     propagate_at_launch = true
   }
 
+  tag {
+    key                 = "PrivateCert"
+    value               = "True"
+    propagate_at_launch = true
+  }
+
   dynamic "tag" {
     for_each = var.tags
     content {
@@ -140,6 +146,11 @@ resource "aws_launch_template" "host_launch_template" {
   name_prefix   = lower(format("asg-template-%s-", var.tags["project_name"]))
   image_id      = data.aws_ami.ubuntu.id
   instance_type = var.host_instance_type
+  
+  iam_instance_profile { 
+      name = var.ec2_acm_iam_profile_name
+    }
+
   block_device_mappings {
     device_name = "/dev/sda1"
     ebs {

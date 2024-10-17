@@ -83,6 +83,7 @@ module "ec2" {
   vpc_id = module.vpc.vpc_id
   vpc_ipv6_cidr_block = module.vpc.ipv6_cidr_block
   load_balancer_web_target_group_arn = module.alb.web_target_group_arn
+  ec2_acm_iam_profile_name = module.iam.ec2_acm_iam_profile_name
 }
 
 # IAM Module - Configures IAM policies and roles
@@ -96,6 +97,33 @@ module "iam" {
   )
 
   config_bucket_name = module.s3.config_bucket_name
+  private_ca_arn = module.pca.private_ca_arn
+}
+
+# Private Certificate Authority Module - Creates a private certificate authority - pca
+module "pca" {
+  source = "./modules/pca"
+
+  tags = merge(
+    data.aws_default_tags.default_tags.tags, {
+      project_name = format(lower(local.project_name))
+    }
+  )
+
+  aws_region = var.aws_region
+
+  key_algorithm = var.pca.key_algorithm
+  signing_algorithm = var.pca.signing_algorithm
+
+  certificate_validity_length = var.pca.certificate_validity_length
+  certificate_validity_timeperiod = var.pca.certificate_validity_timeperiod
+
+  common_name = var.pca.subject.common_name
+  country = var.pca.subject.country
+  locality = var.pca.subject.locality
+  organization = var.pca.subject.organization
+  organizational_unit = var.pca.subject.organizational_unit
+  state = var.pca.subject.state
 }
 
 # Route 53 Module - Manages DNS records
