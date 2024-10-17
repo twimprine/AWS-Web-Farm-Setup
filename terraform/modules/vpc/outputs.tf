@@ -76,3 +76,7 @@ output "vpc_tags_all" {
   value       = aws_vpc.vpc.tags_all
 }
 
+output "ipv6_cidr_block" {
+  value = aws_vpc.vpc.ipv6_cidr_block
+  description = "The IPv6 CIDR block of the VPC"
+}

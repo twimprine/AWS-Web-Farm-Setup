@@ -8,6 +8,12 @@ variable "vpc_id" {
   description = "ID of the VPC"
 }
 
+variable "vpc_ipv6_cidr_block" {
+  description = "The IPv6 CIDR block of the VPC"
+  type        = string
+}
+
+
 variable "vpc_subnet" {
   description = "Subnet of entire VPC"
 }
@@ -78,3 +84,8 @@ variable "asg_max_size" {
 # variable "elastic_nodes" {
 #   description = "Elastic Nodes info"
 # }
+
+variable "load_balancer_web_target_group_arn" {
+  description = "The ARN of the ALB target group to attach the ASG"
+  type        = string
+}

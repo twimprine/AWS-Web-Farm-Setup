@@ -17,21 +17,23 @@ data "aws_ami" "ubuntu" {
 
 
 resource "aws_subnet" "private_ec2_subnets" {
-  count             = length(var.availability_zones)
-  vpc_id            = var.vpc_id
-  cidr_block        = cidrsubnet(var.vpc_subnet, 8, count.index + 1)
-  availability_zone = var.availability_zones[count.index]
+  count                      = length(var.availability_zones)
+  vpc_id                     = var.vpc_id
+  cidr_block                 = cidrsubnet(var.vpc_subnet, 8, count.index + 1)
+  assign_ipv6_address_on_creation = true       # Enable IPv6 on instance creation
+  ipv6_cidr_block            = cidrsubnet(var.vpc_ipv6_cidr_block, 8, count.index)  # Assign IPv6 subnet
+  availability_zone          = var.availability_zones[count.index]
 
   tags = merge(var.tags,
     {
       Name     = lower(format("net-%s-%03d", var.tags["project_name"], count.index + 1))
       Function = format("Private EC2 Host Subnets - %s", var.tags["project_name"])
-  })
+    }
+  )
   
   lifecycle {
     create_before_destroy = true
   }
-
 }
 
 resource "aws_security_group" "hosts_secgrp" {
@@ -95,7 +97,7 @@ resource "aws_autoscaling_group" "hosts_asg" {
   name_prefix         = lower(format("host-%s", var.tags["project_name"]))
   vpc_zone_identifier = aws_subnet.private_ec2_subnets[*].id
   # target_group_arns   = [var.load_balancer_target_group.arn]
-  target_group_arns = []
+  target_group_arns = [var.load_balancer_web_target_group_arn]
 
   mixed_instances_policy {
     launch_template {

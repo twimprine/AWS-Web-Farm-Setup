@@ -2,6 +2,7 @@ resource "aws_vpc" "vpc" {
   cidr_block                           = var.vpc_subnet
   enable_dns_hostnames                 = true
   enable_network_address_usage_metrics = true
+  assign_generated_ipv6_cidr_block = true
 
   tags = merge(var.tags, {
     Name = lower(format("VPC-%s", var.tags["project_name"]))

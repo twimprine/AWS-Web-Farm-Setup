@@ -1,8 +1,8 @@
-/* 
-output "host_subnets" {
+
+output "ec2_host_subnets" {
   description = "Host subnet"
-  value = aws_subnet.host_subnets[*]
-}  */
+  value = aws_subnet.private_ec2_subnets[*]
+}  
 
 /*
 output "docker_network_security_group" {
