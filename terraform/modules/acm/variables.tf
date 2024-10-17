@@ -3,12 +3,12 @@ variable "tags" {
   type        = map(string)
 }
 
-variable "dns-zone" {
+variable "dns_zone" {
   description = "The zone of your domain"
   type        = string
 }
 
-variable "dns-zone-id" {
+variable "dns_zone_id" {
   description = "The zone id of your domain"
   type        = string
 }

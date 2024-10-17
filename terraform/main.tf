@@ -90,5 +90,18 @@ module "route53" {
   region = var.aws_region
   root_domain = var.route_53.root_domain_name
   root_zone_id = var.route_53.root_zone_id
+}
 
+module "acm" {
+  source = "./modules/acm"
+
+  tags = merge(
+    data.aws_default_tags.default_tags.tags, {
+      project_name = format(lower(local.project_name))
+    }
+  )
+
+  dns_zone = module.route53.hosted_zone_name
+  dns_zone_id = module.route53.hosted_zone_id
+  aws_region = var.aws_region
 }

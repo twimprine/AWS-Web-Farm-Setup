@@ -1,6 +1,26 @@
-####################
-# Deployment variables
-####################
+########################
+# Deployment Variables
+########################
+
+# General Project and AWS Settings
+variable "project_name" {
+  description = "Project Name (e.g., webapp). This will be the prefix for the domain and resources."
+  type        = string
+}
+
+variable "aws_region" {
+  description = "AWS region to deploy resources"
+  type        = string
+}
+
+variable "tags" {
+  description = "Tags to apply to all resources"
+  type        = map(string)
+}
+
+########################
+# Application Configuration
+########################
 
 variable "application_settings" {
   description = "Application settings"
@@ -8,9 +28,39 @@ variable "application_settings" {
     app_listening_port  = number
     app_name            = string
     high_availability   = bool
-    region              = string
   })
 }
+
+########################
+# EC2 Configuration
+########################
+
+variable "ec2" {
+  description = "EC2 Instance Attributes"
+  type = object({
+    instance_type = string
+    key_name      = string
+    volume_size   = number
+  })
+}
+
+########################
+# Redis Configuration
+########################
+
+variable "redis" {
+  description = "Redis attributes"
+  type = object({
+    cluster_enabled = bool
+    enabled         = bool
+    instance_type   = string
+    multi_az        = bool
+  })
+}
+
+########################
+# Autoscaling Configuration
+########################
 
 variable "autoscaling" {
   description = "Autoscaling attributes"
@@ -21,10 +71,18 @@ variable "autoscaling" {
   })
 }
 
-variable "aws_region" {
-  description = "AWS region to deploy resources"
+########################
+# VPC and Network Configuration
+########################
+
+variable "vpc_subnet_cidr" {
+  description = "CIDR block for the VPC subnet"
   type        = string
 }
+
+########################
+# Deployment Options
+########################
 
 variable "deployment_options" {
   description = "Deployment options"
@@ -38,39 +96,9 @@ variable "deployment_options" {
   })
 }
 
-variable "ec2" {
-  description = "EC2 Instance Attributes"
-  type = object({
-    instance_type = string
-    key_name      = string
-    volume_size   = number
-  })
-}
-
-variable "project_name" {
-  description = "Project Name (e.g., webapp). This will be the prefix for the domain and resources."
-  type        = string
-}
-
-variable "redis" {
-  description = "Redis attributes"
-  type = object({
-    cluster_enabled = bool
-    enabled         = bool
-    instance_type   = string
-    multi_az        = bool
-  })
-}
-
-variable "tags" {
-  description = "Tags to apply to all resources"
-  type        = map(string)
-}
-
-variable "vpc_subnet_cidr" {
-  description = "CIDR block for the VPC subnet"
-  type        = string
-}
+########################
+# Route 53 Configuration
+########################
 
 variable "route_53" {
   description = "Route 53 attributes"
