@@ -77,3 +77,18 @@ module "iam" {
 
   config_bucket_name = module.s3.config_bucket_name
 }
+
+module "route53" {
+  source = "./modules/route53"
+
+  tags = merge(
+    data.aws_default_tags.default_tags.tags, {
+      project_name = format(lower(local.project_name))
+    }
+  )
+
+  region = var.aws_region
+  root_domain = var.route_53.root_domain_name
+  root_zone_id = var.route_53.root_zone_id
+
+}

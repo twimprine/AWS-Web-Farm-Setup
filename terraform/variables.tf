@@ -9,7 +9,6 @@ variable "application_settings" {
     app_name            = string
     high_availability   = bool
     region              = string
-    root_domain         = string
   })
 }
 
@@ -71,4 +70,13 @@ variable "tags" {
 variable "vpc_subnet_cidr" {
   description = "CIDR block for the VPC subnet"
   type        = string
+}
+
+variable "route_53" {
+  description = "Route 53 attributes"
+  type = object({
+    root_domain_name = string
+    root_zone_id     = string
+    app_subdomain    = string
+  })
 }
