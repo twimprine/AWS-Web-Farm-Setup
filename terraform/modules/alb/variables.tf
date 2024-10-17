@@ -1,7 +1,7 @@
 variable "hosts_app_listening_port" {
   description = "Port that the app is listening on"
   type        = number
-  default     = 8080
+  default     = 443
 }
 
 variable "private_subnets" {

@@ -1,15 +1,6 @@
-provider "aws" {
-  alias  = "us_east_1"
-  region = "us-east-1"
-}
 
-provider "aws" {
-  region = var.aws_region
-}
-
-
-resource "aws_alb" "alb" {
-  name               = lower(format("alb-%s-%s-%s", var.tags["Customer"], var.tags["Project"], var.tags["Environment"]))
+resource "aws_lb" "web_lb" {
+  name               = lower(format("web-lb-%s", var.tags["project_name"]))
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb_secgrp.id]
@@ -17,15 +8,11 @@ resource "aws_alb" "alb" {
   idle_timeout       = var.alb_idle_timeout
 
 
-  tags = merge(var.tags,
-    {
-      name = lower(format("ALB-%s-%s-%s", var.tags["Customer"], var.tags["Project"], var.tags["Environment"]))
-    }
-  )
-
-  /* lifecycle {
+  tags = var.tags
+  
+  lifecycle {
     create_before_destroy = true
-  } */
+  }
 
 }
 
@@ -101,8 +88,8 @@ resource "aws_lb_target_group" "alb_target_group" {
   )
 }
 
-resource "aws_security_group" "alb_secgrp" {
-  name_prefix = "albsrc-"
+resource "aws_security_group" "web_lb_secgrp" {
+  name_prefix = "weblb-secgrp-"
   vpc_id      = var.vpc_id
 
   ingress {

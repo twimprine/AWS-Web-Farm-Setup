@@ -16,7 +16,7 @@ data "aws_ami" "ubuntu" {
 }
 
 
-resource "aws_subnet" "private_subnets" {
+resource "aws_subnet" "private_ec2_subnets" {
   count             = length(var.availability_zones)
   vpc_id            = var.vpc_id
   cidr_block        = cidrsubnet(var.vpc_subnet, 8, count.index + 1)
@@ -25,7 +25,7 @@ resource "aws_subnet" "private_subnets" {
   tags = merge(var.tags,
     {
       Name     = lower(format("net-%s-%03d", var.tags["project_name"], count.index + 1))
-      Function = "Private Host Subnets"
+      Function = format("Private EC2 Host Subnets - %s", var.tags["project_name"])
   })
   
   lifecycle {
@@ -93,7 +93,7 @@ resource "aws_autoscaling_group" "hosts_asg" {
   force_delete              = true
   termination_policies      = ["OldestInstance"]
   name_prefix         = lower(format("host-%s", var.tags["project_name"]))
-  vpc_zone_identifier = aws_subnet.private_subnets[*].id
+  vpc_zone_identifier = aws_subnet.private_ec2_subnets[*].id
   # target_group_arns   = [var.load_balancer_target_group.arn]
   target_group_arns = []
 
@@ -146,14 +146,11 @@ resource "aws_launch_template" "host_launch_template" {
     }
   }
 
- user_data = base64encode(
+  user_data = base64encode(
   templatefile("${path.root}/files/scripts/ec2_initial_script.sh.tftpl", {
     bucket_name = lower(format("s3-%s", var.tags["project_name"]))
   })
-)
-
-
-  
+  )
 
   monitoring {
     enabled = true
@@ -166,8 +163,6 @@ resource "aws_launch_template" "host_launch_template" {
     delete_on_termination       = true
     security_groups             = [aws_security_group.hosts_secgrp.id]
   }
-
-  # user_data = This will pull the ansible script to configure the host from S3
 
   lifecycle {
     create_before_destroy = true
