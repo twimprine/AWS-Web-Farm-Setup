@@ -1,11 +1,64 @@
 #!/usr/bin/bash
 
+# Update system and install necessary packages
 sudo apt update -y
-sudo apt install ansible awscli gpg wget ca-certificates
+sudo apt install ansible awscli gpg wget ca-certificates curl unzip -y
 
-# Fetch Ansible playbook from S3
-aws s3 cp s3://"$(bucket_name)"/ansible/initial_playbook.yml /tmp/playbook.yml
+# Download CloudWatch Agent package
+wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb -O /tmp/amazon-cloudwatch-agent.deb
+sudo dpkg -i /tmp/amazon-cloudwatch-agent.deb
 
-# Run Ansible playbook
-ansible-playbook /tmp/playbook.yml
-EOF
+# Create CloudWatch configuration with dynamic values from Terraform
+cat <<EOT >> /opt/aws/amazon-cloudwatch-agent/bin/config.json
+{
+  "agent": {
+    "metrics_collection_interval": ${metrics_collection_interval},
+    "logfile": "/var/log/cloudwatch-agent.log"
+  },
+  "metrics": {
+    "namespace": "${namespace}",
+    "metrics_collected": {
+      "cpu": {
+        "measurement": [
+          {"name": "cpu_usage_idle", "unit": "Percent"}
+        ],
+        "resources": ["*"]
+      },
+      "mem": {
+        "measurement": [
+          {"name": "mem_used_percent", "unit": "Percent"}
+        ]
+      }
+    }
+  },
+  "logs": {
+    "logs_collected": {
+      "files": {
+        "collect_list": [
+          {
+            "file_path": "/var/log/ansible-playbook.log",
+            "log_group_name": "${log_group_name}",
+            "log_stream_name": "{instance_id}"
+          }
+        ]
+      }
+    }
+  }
+}
+EOT
+
+# Start CloudWatch Agent
+sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a start -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/bin/config.json
+
+# Fetch the Ansible playbook from S3
+aws s3 cp s3://"${bucket_name}"/ansible/initial_playbook.yml /tmp/playbook.yml
+
+# Run the Ansible playbook and log the output
+ansible-playbook /tmp/playbook.yml > /var/log/ansible-playbook.log 2>&1
+playbook_status=$?
+
+if [ $playbook_status -ne 0 ]; then
+  echo "Ansible Playbook failed with status $playbook_status" >> /var/log/ansible-playbook.log
+else
+  echo "Ansible Playbook executed successfully" >> /var/log/ansible-playbook.log
+fi

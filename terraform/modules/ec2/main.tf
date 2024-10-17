@@ -161,9 +161,14 @@ resource "aws_launch_template" "host_launch_template" {
 
   user_data = base64encode(
   templatefile("${path.root}/files/scripts/ec2_initial_script.sh.tftpl", {
-    bucket_name = lower(format("s3-%s", var.tags["project_name"]))
+    bucket_name = lower(format("s3-%s", var.tags["project_name"])),
+    namespace = var.tags["app"],
+    log_group_name = var.tags["project_name"],
+    metrics_collection_interval = 1
   })
   )
+
+  depends_on = [aws_cloudwatch_log_group.ansible_logs]
 
   monitoring {
     enabled = true
@@ -180,4 +185,9 @@ resource "aws_launch_template" "host_launch_template" {
   lifecycle {
     create_before_destroy = true
   }
+}
+
+resource "aws_cloudwatch_log_group" "ansible_logs" {
+  name              = var.tags["project_name"]  
+  retention_in_days = 14  
 }

@@ -43,16 +43,3 @@
         content: "{{ certificate_output.stdout | from_json | json_query('PrivateKey') }}"
         dest: /etc/ssl/private/instance_cert.key
         mode: "0600"
-
-    - name: Configure NGINX with certificate
-      template:
-        src: /path/to/nginx_template.j2
-        dest: /etc/nginx/sites-available/default
-        mode: "0644"
-      notify: restart nginx
-
-  handlers:
-    - name: restart nginx
-      service:
-        name: nginx
-        state: restarted
