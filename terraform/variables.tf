@@ -39,7 +39,7 @@ variable "application_settings" {
 variable "cloudwatch" {
   description = "Cloudwatch attributes"
   type = object({
-    retention_days = number
+    log_retention_days = number
   })
 }
 

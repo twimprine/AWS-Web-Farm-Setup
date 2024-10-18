@@ -63,17 +63,17 @@ module "alb" {
 }
 
 # Cloudwatch Module - Application Logging settings and configs
-module "cloudwatch" {
-  source = "./modules/cloudwatch"
+# module "cloudwatch" {
+#   source = "./modules/cloudwatch"
 
-  tags = merge(
-    data.aws_default_tags.default_tags.tags, {
-      project_name = format(lower(local.project_name))
-    }
-  )
+#   tags = merge(
+#     data.aws_default_tags.default_tags.tags, {
+#       project_name = format(lower(local.project_name))
+#     }
+#   )
 
-  retention_days = var.cloudwatch.retention_days
-}
+#   log_retention_days = var.cloudwatch.log_retention_days
+# }
 
 # EC2 Module - Creates EC2 instances, security groups, and autoscaling groups
 module "ec2" {
@@ -97,6 +97,7 @@ module "ec2" {
   vpc_ipv6_cidr_block = module.vpc.ipv6_cidr_block
   load_balancer_web_target_group_arn = module.alb.web_target_group_arn
   ec2_iam_profile_name = module.iam.ec2_iam_profile_name
+  # cloudwatch_log = module.cloudwatch.cloudwatch_log
 }
 
 # IAM Module - Configures IAM policies and roles

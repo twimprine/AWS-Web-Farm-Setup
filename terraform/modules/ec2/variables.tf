@@ -94,3 +94,8 @@ variable "ec2_iam_profile_name" {
   description = "IAM Instance Profile for EC2 instances to access the ACM Private Certificate Authority"
   type        = string
 }
+
+# variable "cloudwatch_log" {
+#   description = "The ARN of the Cloudwatch log group"
+#   type        = string
+# }

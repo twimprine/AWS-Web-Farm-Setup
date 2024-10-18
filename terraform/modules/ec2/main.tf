@@ -168,7 +168,7 @@ resource "aws_launch_template" "host_launch_template" {
   })
   )
 
-  depends_on = [aws_cloudwatch_log_group.ansible_logs]
+  # depends_on = [var.cloudwatch_log]
 
   monitoring {
     enabled = true

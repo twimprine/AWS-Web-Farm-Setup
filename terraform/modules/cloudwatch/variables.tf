@@ -3,7 +3,7 @@ variable "tags" {
   type        = map(string)
 }
 
-variable "retention_days" {
+variable "log_retention_days" {
   description = "Number of days to retain logs"
   type        = number
 }
