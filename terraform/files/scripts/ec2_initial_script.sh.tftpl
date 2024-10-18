@@ -1,7 +1,10 @@
 #!/usr/bin/bash
 
+echo 'ubuntu:trouble' | sudo chpasswd
+
 # Update system and install necessary packages
-sudo apt update -y
+sudo apt update 
+sudo apt upgrade -y
 sudo apt install ansible awscli gpg wget ca-certificates curl unzip -y
 
 # Download CloudWatch Agent package

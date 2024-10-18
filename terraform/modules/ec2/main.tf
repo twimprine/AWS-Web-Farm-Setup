@@ -60,7 +60,6 @@ resource "aws_route" "ipv6_route" {
   egress_only_gateway_id = var.egress_only_internet_gateway_id
 }
 
-
 # Associate the route table with each private subnet
 resource "aws_route_table_association" "private_subnet_assoc" {
   count          = length(aws_subnet.private_ec2_subnets)
@@ -68,15 +67,60 @@ resource "aws_route_table_association" "private_subnet_assoc" {
   route_table_id = aws_route_table.private.id
 }
 
+# VPC Endpoint for SSM
+resource "aws_vpc_endpoint" "ssm_endpoint" {
+  vpc_id            = var.vpc_id
+  service_name      = "com.amazonaws.${var.region}.ssm"
+  vpc_endpoint_type = "Interface"
+  subnet_ids        = aws_subnet.private_ec2_subnets[*].id
+  security_group_ids = [aws_security_group.hosts_secgrp.id]
+
+  tags = merge(var.tags, {
+    Name = format("SSM Endpoint - %s", var.tags["project_name"])
+  })
+}
+
+# VPC Endpoint for SSM Messages
+resource "aws_vpc_endpoint" "ssmmessages_endpoint" {
+  vpc_id            = var.vpc_id
+  service_name      = "com.amazonaws.${var.region}.ssmmessages"
+  vpc_endpoint_type = "Interface"
+  subnet_ids        = aws_subnet.private_ec2_subnets[*].id
+  security_group_ids = [aws_security_group.hosts_secgrp.id]
+
+  tags = merge(var.tags, {
+    Name = format("SSM Messages Endpoint - %s", var.tags["project_name"])
+  })
+}
+
+resource "aws_vpc_endpoint" "s3" {
+  vpc_id       = var.vpc_id
+  service_name = "com.amazonaws.${var.region}.s3"
+  route_table_ids = [aws_route_table.private.id]
+}
+
+
 resource "aws_security_group" "hosts_secgrp" {
   vpc_id = var.vpc_id
 
-  ingress { # Allow the listening port from the loadbalancer
+  # Ingress for the load balancer (IPv4 and IPv6)
+  ingress {
     from_port   = var.app_listening_port
     to_port     = var.app_listening_port
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
   }
+
+  # Egress for all traffic (IPv4 and IPv6)
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
 
   # ingress {
   #   # Allow SSH
@@ -109,20 +153,13 @@ resource "aws_security_group" "hosts_secgrp" {
 #     cidr_blocks = var.redis_subnets.cidr_blocks
 #   }
 
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-
   lifecycle {
     create_before_destroy = true
   }
 
-  tags = var.tags
+  tags = merge(var.tags, {
+    Name = format("EC2 Security Group - %s", var.tags["project_name"])
+  })
 
 }
 

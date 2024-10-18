@@ -92,7 +92,7 @@ resource "aws_iam_policy" "ec2_acm_certificate_policy" {
 # Create CloudWatch policy to allow EC2 to write logs and send metrics to CloudWatch
 resource "aws_iam_policy" "cloudwatch_policy" {
   name        = "EC2CloudWatchPolicy"
-  description = "IAM policy for EC2 instances to write logs and metrics to CloudWatch"
+  description = "IAM policy for EC2 instances to download agent and write logs and metrics to CloudWatch"
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -103,7 +103,13 @@ resource "aws_iam_policy" "cloudwatch_policy" {
           "logs:CreateLogStream",
           "logs:PutLogEvents",
           "logs:DescribeLogStreams",
-          "logs:DescribeLogGroups"
+          "logs:DescribeLogGroups",
+          "ssm:DescribeInstanceInformation",
+          "ssm:GetParameter",
+          "ssm:ListCommands",
+          "ssm:SendCommand",
+          "ssm:StartSession",
+          "ssmmessages:*"
         ],
         Resource: "*"
       },
@@ -117,6 +123,7 @@ resource "aws_iam_policy" "cloudwatch_policy" {
     ]
   })
 }
+
 
 # Attach both the ACM PCA and CloudWatch policies to the combined role
 resource "aws_iam_role_policy_attachment" "acm_policy_attachment" {
