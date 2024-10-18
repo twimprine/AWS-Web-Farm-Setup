@@ -86,6 +86,7 @@ module "ec2" {
   )
 
   app_listening_port = var.application_settings.app_listening_port
+  associate_public_ip_address = var.ec2.associate_public_ip_address
   availability_zones = local.availability_zones
   host_instance_type = var.ec2.instance_type
   vpc_subnet = var.vpc_subnet_cidr

@@ -53,6 +53,7 @@ variable "ec2" {
     instance_type = string
     key_name      = string
     volume_size   = number
+    associate_public_ip_address = bool
   })
 }
 

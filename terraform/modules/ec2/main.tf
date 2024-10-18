@@ -99,6 +99,7 @@ resource "aws_autoscaling_group" "hosts_asg" {
   # target_group_arns   = [var.load_balancer_target_group.arn]
   target_group_arns = [var.load_balancer_web_target_group_arn]
 
+
   mixed_instances_policy {
     launch_template {
       launch_template_specification {
@@ -177,7 +178,7 @@ resource "aws_launch_template" "host_launch_template" {
   instance_initiated_shutdown_behavior = "terminate"
 
   network_interfaces {
-    associate_public_ip_address = false
+    associate_public_ip_address = var.associate_public_ip_address
     delete_on_termination       = true
     security_groups             = [aws_security_group.hosts_secgrp.id]
   }

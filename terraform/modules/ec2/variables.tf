@@ -99,3 +99,8 @@ variable "ec2_iam_profile_name" {
 #   description = "The ARN of the Cloudwatch log group"
 #   type        = string
 # }
+
+variable "associate_public_ip_address" {
+  description = "Associate a public IP address with the EC2 instance"
+  type        = bool
+}
