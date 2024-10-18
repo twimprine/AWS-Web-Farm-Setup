@@ -31,6 +31,18 @@ variable "application_settings" {
   })
 }
 
+
+########################
+# Cloudwatch Configuration
+########################
+
+variable "cloudwatch" {
+  description = "Cloudwatch attributes"
+  type = object({
+    retention_days = number
+  })
+}
+
 ########################
 # EC2 Configuration
 ########################

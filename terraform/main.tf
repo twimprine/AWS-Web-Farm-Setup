@@ -62,6 +62,7 @@ module "alb" {
   vpc_id = module.vpc.vpc_id
 }
 
+# Cloudwatch Module - Application Logging settings and configs
 module "cloudwatch" {
   source = "./modules/cloudwatch"
 
@@ -70,6 +71,8 @@ module "cloudwatch" {
       project_name = format(lower(local.project_name))
     }
   )
+
+  retention_days = var.cloudwatch.retention_days
 }
 
 # EC2 Module - Creates EC2 instances, security groups, and autoscaling groups
