@@ -46,6 +46,14 @@ resource "aws_security_group" "hosts_secgrp" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  ingress {
+    # Allow SSH
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
 #   ingress { #Allow Redis connections 
 #     from_port   = var.redis_cluster.cluster_endpoint[0].port
 #     to_port     = var.redis_cluster.cluster_endpoint[0].port
