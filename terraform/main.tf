@@ -84,25 +84,35 @@ module "ec2" {
       project_name = format(lower(local.project_name))
     }
   )
-
-  app_listening_port = var.application_settings.app_listening_port
-  associate_public_ip_address = var.ec2.associate_public_ip_address
+  # General settings
   availability_zones = local.availability_zones
-  host_instance_type = var.ec2.instance_type
-  key_name = var.ec2.key_name
+  region = var.aws_region
+
+  # VPC and network settings
+  egress_only_internet_gateway_id = module.vpc.egress_only_internet_gateway_id
+  internet_gateway_arn = module.vpc.internet_gateway_arn
+  internet_gateway_id = module.vpc.internet_gateway_id
+  vpc_id = module.vpc.vpc_id
+  vpc_ipv6_cidr_block = module.vpc.ipv6_cidr_block
   vpc_subnet = var.vpc_subnet_cidr
+
+  # EC2 settings
+  associate_public_ip_address = var.ec2.associate_public_ip_address
+  ec2_iam_profile_name = module.iam.ec2_iam_profile_name
+  host_instance_type = var.ec2.instance_type
   host_volume_size = var.ec2.volume_size
+  key_name = var.ec2.key_name
+
+  # Application settings
+  app_listening_port = var.application_settings.app_listening_port
+
+  # Autoscaling settings
   asg_desired_capacity = var.autoscaling.desired_capacity
   asg_max_size = var.autoscaling.max_size
   asg_min_size = var.autoscaling.min_size
-  vpc_id = module.vpc.vpc_id
-  vpc_ipv6_cidr_block = module.vpc.ipv6_cidr_block
+
+  # Load balancer settings
   load_balancer_web_target_group_arn = module.alb.web_target_group_arn
-  ec2_iam_profile_name = module.iam.ec2_iam_profile_name
-  # cloudwatch_log = module.cloudwatch.cloudwatch_log
-  internet_gateway_id = module.vpc.internet_gateway_id
-  internet_gateway_arn = module.vpc.internet_gateway_arn
-  egress_only_internet_gateway_id = module.vpc.egress_only_internet_gateway_id
 }
 
 # IAM Module - Configures IAM policies and roles

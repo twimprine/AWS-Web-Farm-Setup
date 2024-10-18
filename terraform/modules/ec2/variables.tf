@@ -127,3 +127,8 @@ variable "egress_only_internet_gateway_id" {
   description = "The ID of the Egress-Only Internet Gateway (EOIGW)"
   type        = string
 }
+
+variable "region" {
+  description = "The AWS region"
+  type        = string
+}
