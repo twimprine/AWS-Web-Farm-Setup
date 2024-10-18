@@ -187,6 +187,8 @@ resource "aws_launch_template" "host_launch_template" {
   lifecycle {
     create_before_destroy = true
   }
+
+  tags = var.tags
 }
 
 resource "aws_cloudwatch_log_group" "ansible_logs" {
