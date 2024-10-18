@@ -148,7 +148,7 @@ resource "aws_launch_template" "host_launch_template" {
   instance_type = var.host_instance_type
   
   iam_instance_profile { 
-      name = var.ec2_acm_iam_profile_name
+      name = var.ec2_iam_profile_name
     }
 
   block_device_mappings {

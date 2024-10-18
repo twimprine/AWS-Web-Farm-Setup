@@ -40,11 +40,11 @@ resource "aws_iam_role_policy_attachment" "attach_s3_policy" {
   policy_arn = aws_iam_policy.s3_read_access.arn
 }
 
-############################################################################################################
-# IAM Configuration for EC2 instances to access the ACM Private Certificate Authority
-############################################################################################################
-resource "aws_iam_role" "ec2_acm_role" {
-  name = "EC2_ACM_Role"
+
+# Create IAM role for EC2 instances
+resource "aws_iam_role" "ec2_combined_role" {
+  name = "EC2_Combined_Role"
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -60,10 +60,11 @@ resource "aws_iam_role" "ec2_acm_role" {
 
   tags = merge(var.tags, 
     { 
-      Name = "EC2 ACM Role" 
+      Name = "EC2 Combined Role" 
     })
 }
 
+# Create the ACM PCA policy to allow EC2 to retrieve and export certificates
 resource "aws_iam_policy" "ec2_acm_certificate_policy" {
   name        = "EC2_ACM_Certificate_Policy"
   description = "Allows EC2 instances to retrieve and export ACM Private CA certificates"
@@ -79,7 +80,7 @@ resource "aws_iam_policy" "ec2_acm_certificate_policy" {
         Resource = var.private_ca_arn
         Condition = {
           "ForAllValues:StringEquals" = {
-            "aws:RequestTag/PrivateCert" = "True"
+            "aws:RequestTag/PrivateCert" = "True",
             "aws:RequestTag/ProjectName" = var.tags["project_name"]
           }
         }
@@ -88,12 +89,48 @@ resource "aws_iam_policy" "ec2_acm_certificate_policy" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "ec2_acm_role_attachment" {
-  role       = aws_iam_role.ec2_acm_role.name
+# Create CloudWatch policy to allow EC2 to write logs and send metrics to CloudWatch
+resource "aws_iam_policy" "cloudwatch_policy" {
+  name        = "EC2CloudWatchPolicy"
+  description = "IAM policy for EC2 instances to write logs and metrics to CloudWatch"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect: "Allow",
+        Action: [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "logs:DescribeLogStreams",
+          "logs:DescribeLogGroups"
+        ],
+        Resource: "*"
+      },
+      {
+        Effect: "Allow",
+        Action: [
+          "cloudwatch:PutMetricData"
+        ],
+        Resource: "*"
+      }
+    ]
+  })
+}
+
+# Attach both the ACM PCA and CloudWatch policies to the combined role
+resource "aws_iam_role_policy_attachment" "acm_policy_attachment" {
+  role       = aws_iam_role.ec2_role.name
   policy_arn = aws_iam_policy.ec2_acm_certificate_policy.arn
 }
 
-resource "aws_iam_instance_profile" "ec2_acm_instance_profile" {
-  name = "EC2_ACM_Instance_Profile"
-  role = aws_iam_role.ec2_acm_role.name
+resource "aws_iam_role_policy_attachment" "cloudwatch_policy_attachment" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = aws_iam_policy.cloudwatch_policy.arn
+}
+
+# Create instance profile for EC2 instances
+resource "aws_iam_instance_profile" "ec2_instance_profile" {
+  name = "EC2_Instance_Profile"
+  role = aws_iam_role.ec2_role.name
 }

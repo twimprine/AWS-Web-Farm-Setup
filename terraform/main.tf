@@ -62,6 +62,16 @@ module "alb" {
   vpc_id = module.vpc.vpc_id
 }
 
+module "cloudwatch" {
+  source = "./modules/cloudwatch"
+
+  tags = merge(
+    data.aws_default_tags.default_tags.tags, {
+      project_name = format(lower(local.project_name))
+    }
+  )
+}
+
 # EC2 Module - Creates EC2 instances, security groups, and autoscaling groups
 module "ec2" {
   source = "./modules/ec2"
@@ -83,7 +93,7 @@ module "ec2" {
   vpc_id = module.vpc.vpc_id
   vpc_ipv6_cidr_block = module.vpc.ipv6_cidr_block
   load_balancer_web_target_group_arn = module.alb.web_target_group_arn
-  ec2_acm_iam_profile_name = module.iam.ec2_acm_iam_profile_name
+  ec2_iam_profile_name = module.iam.ec2_iam_profile_name
 }
 
 # IAM Module - Configures IAM policies and roles

@@ -90,7 +90,7 @@ variable "load_balancer_web_target_group_arn" {
   type        = string
 }
 
-variable "ec2_acm_iam_profile_name" {
+variable "ec2_iam_profile_name" {
   description = "IAM Instance Profile for EC2 instances to access the ACM Private Certificate Authority"
   type        = string
 }
