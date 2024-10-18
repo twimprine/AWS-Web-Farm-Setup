@@ -36,6 +36,38 @@ resource "aws_subnet" "private_ec2_subnets" {
   }
 }
 
+
+# Route Table for private subnets
+resource "aws_route_table" "private" {
+  vpc_id = var.vpc_id
+
+  tags = merge(var.tags, {
+    Name = lower(format("Private-RT-%s", var.tags["project_name"]))
+  })
+}
+
+# Route for IPv4 (through Internet Gateway)
+resource "aws_route" "ipv4_route" {
+  route_table_id         = aws_route_table.private.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = var.internet_gateway_id
+}
+
+# Route for IPv6 (through Egress-Only Internet Gateway)
+resource "aws_route" "ipv6_route" {
+  route_table_id                = aws_route_table.private.id
+  destination_ipv6_cidr_block   = "::/0"
+  egress_only_gateway_id = var.egress_only_internet_gateway_id
+}
+
+
+# Associate the route table with each private subnet
+resource "aws_route_table_association" "private_subnet_assoc" {
+  count          = length(aws_subnet.private_ec2_subnets)
+  subnet_id      = aws_subnet.private_ec2_subnets[count.index].id
+  route_table_id = aws_route_table.private.id
+}
+
 resource "aws_security_group" "hosts_secgrp" {
   vpc_id = var.vpc_id
 

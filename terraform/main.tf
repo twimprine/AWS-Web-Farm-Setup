@@ -100,6 +100,9 @@ module "ec2" {
   load_balancer_web_target_group_arn = module.alb.web_target_group_arn
   ec2_iam_profile_name = module.iam.ec2_iam_profile_name
   # cloudwatch_log = module.cloudwatch.cloudwatch_log
+  internet_gateway_id = module.vpc.internet_gateway_id
+  internet_gateway_arn = module.vpc.internet_gateway_arn
+  egress_only_internet_gateway_id = module.vpc.egress_only_internet_gateway_id
 }
 
 # IAM Module - Configures IAM policies and roles

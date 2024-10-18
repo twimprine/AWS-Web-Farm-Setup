@@ -26,3 +26,15 @@ resource "aws_internet_gateway" "igw" {
   }
 }
 
+# Egress-Only Internet Gateway for IPv6 traffic
+resource "aws_egress_only_internet_gateway" "eogw" {
+  vpc_id = aws_vpc.vpc.id
+
+  tags = merge(var.tags, {
+    Name = lower(format("EOIGW-%s", var.tags["project_name"]))
+  })
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}

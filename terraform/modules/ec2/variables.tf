@@ -109,3 +109,21 @@ variable "key_name" {
   description = "The key pair name to associate with the EC2 instance"
   type        = string
 }
+
+# Variable for Internet Gateway ID
+variable "internet_gateway_id" {
+  description = "The ID of the Internet Gateway (IGW)"
+  type        = string
+}
+
+# Variable for Internet Gateway ARN
+variable "internet_gateway_arn" {
+  description = "The ARN of the Internet Gateway (IGW)"
+  type        = string
+}
+
+# Variable for Egress-Only Internet Gateway ID
+variable "egress_only_internet_gateway_id" {
+  description = "The ID of the Egress-Only Internet Gateway (EOIGW)"
+  type        = string
+}

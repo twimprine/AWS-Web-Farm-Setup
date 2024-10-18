@@ -80,3 +80,20 @@ output "ipv6_cidr_block" {
   value = aws_vpc.vpc.ipv6_cidr_block
   description = "The IPv6 CIDR block of the VPC"
 }
+
+# Output for Internet Gateway (IGW)
+output "internet_gateway_id" {
+  description = "The ID of the Internet Gateway (IGW)"
+  value       = aws_internet_gateway.igw.id
+}
+
+output "internet_gateway_arn" {
+  description = "The ARN of the Internet Gateway (IGW)"
+  value       = aws_internet_gateway.igw.arn
+}
+
+# Output for Egress-Only Internet Gateway (EOIGW)
+output "egress_only_internet_gateway_id" {
+  description = "The ID of the Egress-Only Internet Gateway (EOIGW)"
+  value       = aws_egress_only_internet_gateway.eogw.id
+}
