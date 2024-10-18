@@ -46,13 +46,13 @@ resource "aws_security_group" "hosts_secgrp" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  ingress {
-    # Allow SSH
-    from_port = 22
-    to_port = 22
-    protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  # ingress {
+  #   # Allow SSH
+  #   from_port = 22
+  #   to_port = 22
+  #   protocol = "tcp"
+  #   cidr_blocks = ["0.0.0.0/0"]
+  # }
 
 #   ingress { #Allow Redis connections 
 #     from_port   = var.redis_cluster.cluster_endpoint[0].port
@@ -199,7 +199,7 @@ resource "aws_launch_template" "host_launch_template" {
   tags = var.tags
 }
 
-resource "aws_cloudwatch_log_group" "ansible_logs" {
-  name              = var.tags["project_name"]  
-  retention_in_days = 14  
-}
+# resource "aws_cloudwatch_log_group" "ansible_logs" {
+#   name              = var.tags["project_name"]  
+#   retention_in_days = 14  
+# }

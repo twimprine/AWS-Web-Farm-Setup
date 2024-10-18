@@ -63,17 +63,17 @@ module "alb" {
 }
 
 # Cloudwatch Module - Application Logging settings and configs
-# module "cloudwatch" {
-#   source = "./modules/cloudwatch"
+module "cloudwatch" {
+  source = "./modules/cloudwatch"
 
-#   tags = merge(
-#     data.aws_default_tags.default_tags.tags, {
-#       project_name = format(lower(local.project_name))
-#     }
-#   )
+  tags = merge(
+    data.aws_default_tags.default_tags.tags, {
+      project_name = format(lower(local.project_name))
+    }
+  )
 
-#   log_retention_days = var.cloudwatch.log_retention_days
-# }
+  log_retention_days = var.cloudwatch.log_retention_days
+}
 
 # EC2 Module - Creates EC2 instances, security groups, and autoscaling groups
 module "ec2" {
