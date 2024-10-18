@@ -147,6 +147,7 @@ resource "aws_launch_template" "host_launch_template" {
   name_prefix   = lower(format("asg-template-%s-", var.tags["project_name"]))
   image_id      = data.aws_ami.ubuntu.id
   instance_type = var.host_instance_type
+  key_name      = var.key_name
   
   iam_instance_profile { 
       name = var.ec2_iam_profile_name

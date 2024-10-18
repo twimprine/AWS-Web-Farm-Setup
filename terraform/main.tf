@@ -89,6 +89,7 @@ module "ec2" {
   associate_public_ip_address = var.ec2.associate_public_ip_address
   availability_zones = local.availability_zones
   host_instance_type = var.ec2.instance_type
+  key_name = var.ec2.key_name
   vpc_subnet = var.vpc_subnet_cidr
   host_volume_size = var.ec2.volume_size
   asg_desired_capacity = var.autoscaling.desired_capacity

@@ -104,3 +104,8 @@ variable "associate_public_ip_address" {
   description = "Associate a public IP address with the EC2 instance"
   type        = bool
 }
+
+variable "key_name" {
+  description = "The key pair name to associate with the EC2 instance"
+  type        = string
+}
