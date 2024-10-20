@@ -8,7 +8,7 @@ sudo apt upgrade -y
 sudo apt install ansible awscli gpg wget ca-certificates curl unzip -y
 
 # Download CloudWatch Agent package
-wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb -O /tmp/amazon-cloudwatch-agent.deb
+wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/arm64/latest/amazon-cloudwatch-agent.deb -O /tmp/amazon-cloudwatch-agent.deb
 sudo dpkg -i /tmp/amazon-cloudwatch-agent.deb
 
 # Create CloudWatch configuration with dynamic values from Terraform
@@ -54,9 +54,11 @@ EOT
 sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a start -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/bin/config.json
 
 # Fetch the Ansible playbook from S3
-aws s3 cp s3://"${bucket_name}"/ansible/initial_playbook.yml /tmp/playbook.yml
+echo "Fetching Ansible playbook from S3 bucket: ${bucket_name}"
+aws s3 cp s3://"${bucket_name}"/initial_config/initial_playbook.yml /tmp/playbook.yml
 
 # Run the Ansible playbook and log the output
+echo "Running Ansible playbook"
 ansible-playbook /tmp/playbook.yml > /var/log/ansible-playbook.log 2>&1
 playbook_status=$?
 
@@ -64,4 +66,5 @@ if [ $playbook_status -ne 0 ]; then
   echo "Ansible Playbook failed with status $playbook_status" >> /var/log/ansible-playbook.log
 else
   echo "Ansible Playbook executed successfully" >> /var/log/ansible-playbook.log
+  sudo reboot
 fi

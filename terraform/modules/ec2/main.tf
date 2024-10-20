@@ -73,12 +73,37 @@ resource "aws_vpc_endpoint" "ssm_endpoint" {
   service_name      = "com.amazonaws.${var.region}.ssm"
   vpc_endpoint_type = "Interface"
   subnet_ids        = aws_subnet.private_ec2_subnets[*].id
-  security_group_ids = [aws_security_group.hosts_secgrp.id]
+  security_group_ids = [aws_security_group.vpc_endpoint_sg.id]
 
   tags = merge(var.tags, {
     Name = format("SSM Endpoint - %s", var.tags["project_name"])
   })
 }
+
+resource "aws_security_group" "vpc_endpoint_sg" {
+  vpc_id = var.vpc_id
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  tags = merge(var.tags, {
+    Name = "VPC Endpoint Security Group"
+  })
+}
+
 
 # VPC Endpoint for SSM Messages
 resource "aws_vpc_endpoint" "ssmmessages_endpoint" {

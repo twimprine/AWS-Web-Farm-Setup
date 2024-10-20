@@ -7,7 +7,9 @@ provider "aws" {
   region = var.aws_region
 
   default_tags {
-    tags = local.combined_tags
+    tags = merge(local.combined_tags, {
+      project_name = format(lower(local.project_name))
+    })
   }
 }
 
