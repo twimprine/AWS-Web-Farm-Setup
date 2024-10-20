@@ -4,7 +4,7 @@
   become: true
   tasks:
     - name: Request a certificate from ACM Private CA
-      shell: |
+      ansible.builtin.shell: |
         aws acm-pca issue-certificate \
           --certificate-authority-arn {{ ca_arn }} \
           --csr file://path/to/csr.pem \  # Specify CSR path or generate it here
@@ -16,11 +16,11 @@
       register: cert_arn
 
     - name: Wait for certificate to be issued
-      pause:
+      ansible.builtin.pause:
         seconds: 30  # Adjust as needed to ensure the certificate is issued
 
     - name: Retrieve the certificate
-      shell: |
+      ansible.builtin.shell: |
         aws acm-pca get-certificate \
           --certificate-authority-arn {{ ca_arn }} \
           --certificate-arn {{ cert_arn.stdout }} \
@@ -29,17 +29,17 @@
       register: certificate_output
 
     - name: Write certificate to file
-      copy:
+      ansible.builtin.copy:
         content: "{{ certificate_output.stdout | from_json | json_query('Certificate') }}"
         dest: /etc/ssl/certs/instance_cert.crt
 
     - name: Write certificate chain to file
-      copy:
+      ansible.builtin.copy:
         content: "{{ certificate_output.stdout | from_json | json_query('CertificateChain') }}"
         dest: /etc/ssl/certs/ca_chain.crt
 
     - name: Write private key to file
-      copy:
+      ansible.builtin.copy:
         content: "{{ certificate_output.stdout | from_json | json_query('PrivateKey') }}"
         dest: /etc/ssl/private/instance_cert.key
         mode: "0600"

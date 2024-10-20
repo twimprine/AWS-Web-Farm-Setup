@@ -56,8 +56,16 @@ sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a start -
 # Fetch the Ansible playbook from S3
 echo "Fetching Ansible playbook from S3 bucket: ${bucket_name}"
 aws s3 cp s3://"${bucket_name}"/initial_config/initial_playbook.yml /tmp/playbook.yml
+aws s3 cp s3://"${bucket_name}"/initial_config/requirements.yml /tmp/requirements.yml
+aws s3 cp s3://"${bucket_name}"/initial_config/execute_ansible.sh /tmp/execute_ansible.sh
+
+chmod +x /tmp/execute_ansible.sh
 
 # Run the Ansible playbook and log the output
+
+echo "Install Ansible dependencies"
+ansible-galaxy install -r /tmp/requirements.yml
+
 echo "Running Ansible playbook"
 ansible-playbook /tmp/playbook.yml > /var/log/ansible-playbook.log 2>&1
 playbook_status=$?
