@@ -1,13 +1,34 @@
 ---
-- name: Request and install ACM Private CA certificate
+- name: Dynamically retrieve region and ACM Private CA ARN and generate CSR
   hosts: localhost
   become: true
   tasks:
+
+    - name: Generate an OpenSSL private key with a different size (2048 bits)
+      community.crypto.openssl_privatekey:
+        path: /etc/ssl/private/instance_csr.pem
+        size: 2048
+
+
+
+    - name: Generate an OpenSSL Certificate Signing Request (CSR)
+      community.crypto.openssl_csr:
+        path: /etc/ssl/private/instance_csr.csr
+        privatekey_path: /etc/ssl/private/instance_csr.pem
+        country_name: ${country}
+        organization_name: ${organization}
+        common_name: ${common_name}
+        locality_name: ${locality}
+        state_or_province_name: ${state}
+        organizational_unit_name: ${organizational_unit}
+        subject_alt_name: "DNS:{{ ansible_hostname }}"
+
     - name: Request a certificate from ACM Private CA
       ansible.builtin.shell: |
         aws acm-pca issue-certificate \
-          --certificate-authority-arn {{ ca_arn }} \
-          --csr file://path/to/csr.pem \  # Specify CSR path or generate it here
+          --region ${region} \
+          --certificate-authority-arn ${pca_arn} \
+          --csr file:///etc/ssl/private/instance_csr.csr \
           --signing-algorithm "SHA256WITHRSA" \
           --validity Value=365,Type="DAYS" \
           --idempotency-token $(uuidgen) \
@@ -22,9 +43,10 @@
     - name: Retrieve the certificate
       ansible.builtin.shell: |
         aws acm-pca get-certificate \
-          --certificate-authority-arn {{ ca_arn }} \
+          --region ${region} \
+          --certificate-authority-arn ${pca_arn} \
           --certificate-arn {{ cert_arn.stdout }} \
-          --query '{Certificate:Certificate,CertificateChain:CertificateChain,PrivateKey:PrivateKey}' \
+          --query '{Certificate:Certificate,CertificateChain:CertificateChain}' \
           --output json
       register: certificate_output
 
@@ -37,9 +59,3 @@
       ansible.builtin.copy:
         content: "{{ certificate_output.stdout | from_json | json_query('CertificateChain') }}"
         dest: /etc/ssl/certs/ca_chain.crt
-
-    - name: Write private key to file
-      ansible.builtin.copy:
-        content: "{{ certificate_output.stdout | from_json | json_query('PrivateKey') }}"
-        dest: /etc/ssl/private/instance_cert.key
-        mode: "0600"

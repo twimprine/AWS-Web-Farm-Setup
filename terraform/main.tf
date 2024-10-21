@@ -176,6 +176,11 @@ module "route53" {
 module "s3" {
   source = "./modules/s3"
 
+  pca_arn = module.pca.private_ca_arn
+  pca = var.pca
+  region = var.aws_region
+
+
   tags = merge(
     data.aws_default_tags.default_tags.tags, {
       project_name = format(lower(local.project_name))
