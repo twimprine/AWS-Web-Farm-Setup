@@ -100,7 +100,7 @@ resource "aws_security_group" "vpc_endpoint_sg" {
   }
 
   tags = merge(var.tags, {
-    Name = "VPC Endpoint Security Group"
+    Name = format("VPC Endpoint Security Group - %s", var.tags["project_name"])
   })
 }
 
@@ -118,11 +118,26 @@ resource "aws_vpc_endpoint" "ssmmessages_endpoint" {
   })
 }
 
+# Endpoint for S3
 resource "aws_vpc_endpoint" "s3" {
   vpc_id       = var.vpc_id
   service_name = "com.amazonaws.${var.region}.s3"
   route_table_ids = [aws_route_table.private.id]
 }
+
+# VPC Endpoint for ACM-PCA
+resource "aws_vpc_endpoint" "acm_pca_endpoint" {
+  vpc_id            = var.vpc_id
+  service_name      = "com.amazonaws.${var.region}.acm-pca"
+  vpc_endpoint_type = "Interface"
+  subnet_ids        = aws_subnet.private_ec2_subnets[*].id
+  security_group_ids = [aws_security_group.vpc_endpoint_sg.id]  # The security group attached to the endpoint
+
+  tags = merge(var.tags, {
+    Name = format("ACM-PCA Endpoint - %s", var.tags["project_name"])
+  })
+}
+
 
 
 resource "aws_security_group" "hosts_secgrp" {

@@ -114,7 +114,7 @@ resource "aws_iam_policy" "ec2_acm_certificate_policy" {
 				"acm:GetCertificate",
 				"acm:RenewCertificate"
 			],
-        Resource = var.private_ca_arn
+        Resource = var.private_ca_arn,
         Condition = {
           "StringEquals" = {
             "aws:RequestTag/PrivateCert" = "True",
@@ -129,6 +129,36 @@ resource "aws_iam_policy" "ec2_acm_certificate_policy" {
     Name = format("EC2_ACM_Certificate_Policy_%s", var.tags["project_name"])
   })
 }
+
+resource "aws_iam_policy" "acm_pca_policy" {
+  description = "Policy for EC2 instances to request certificates from ACM PCA"
+  policy      = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect   = "Allow",
+        Action   = [
+          "acm-pca:IssueCertificate",
+          "acm-pca:GetCertificate",
+          "acm-pca:ListCertificateAuthorities"
+        ],
+        Resource = "*",
+        Condition = {
+          "StringEquals" = {
+            "aws:RequestTag/PrivateCert" = "True",
+            "aws:RequestTag/ProjectName" = var.tags["project_name"]
+          }
+        }
+      }
+    ]
+  })
+  name = format("EC2_ACM_PCA_Certificate_Policy_%s", var.tags["project_name"])
+  tags = merge(var.tags, {
+    Name = format("EC2_ACM_PCA_Certificate_Policy_%s", var.tags["project_name"])
+  })
+}
+
+
 
 # Create CloudWatch policy to allow EC2 to write logs and send metrics to CloudWatch
 resource "aws_iam_policy" "cloudwatch_policy" {
@@ -209,10 +239,14 @@ resource "aws_iam_role_policy_attachment" "attach_s3_policy" {
   policy_arn = aws_iam_policy.s3_read_access.arn
 }
 
+resource "aws_iam_role_policy_attachment" "acm_pca_policy_attachment" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = aws_iam_policy.acm_pca_policy.arn
+}
+
 # Create instance profile for EC2 instances
 resource "aws_iam_instance_profile" "ec2_instance_profile" {
   name = format("EC2_Instance_Profile_%s", var.tags["project_name"])
   role = aws_iam_role.ec2_role.name
 }
-
 
